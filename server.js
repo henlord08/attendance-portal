@@ -59,7 +59,7 @@ app.post('/api/attend', async (req, res) => {
 
     } catch (error) {
         console.error("Error in /api/attend:", error);
-        res.status(500).json({ message: 'Already done submitted attendance.' });
+        res.status(500).json({ message: 'This portal is not yet open to accept attendance.' });
     }
 });
 
