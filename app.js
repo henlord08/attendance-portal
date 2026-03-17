@@ -3,10 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const suggestionsDiv = document.getElementById('suggestions');
     const staffIdField = document.getElementById('staffIdField');
     const staffNameField = document.getElementById('staffNameField');
+    const staffBranchField = document.getElementById('staffBranchField');
     const submitBtn = document.getElementById('submitBtn');
     const exportBtn = document.getElementById('exportBtn');
     const statusDiv = document.getElementById('status');
     const spinner = submitBtn.querySelector('.spinner-border');
+    
 
     let staffList = [];
     let selectedStaff = null;
@@ -26,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         searchBox.value = staff.staff_name;
         staffIdField.value = staff.staff_id;
         staffNameField.value = staff.staff_name;
+        staffBranchField.value = staff.branch || 'N/A';
         submitBtn.disabled = false;
         suggestionsDiv.innerHTML = '';
         statusDiv.innerHTML = '';
@@ -39,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selectedStaff = null;
             staffIdField.value = '';
             staffNameField.value = '';
+            staffBranchField.value = '';
             submitBtn.disabled = true;
             return;
         }
@@ -50,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const suggestionItem = document.createElement('a');
             suggestionItem.href = '#';
             suggestionItem.className = 'list-group-item list-group-item-action';
-            suggestionItem.innerHTML = `${staff.staff_name} <small class="text-muted">(${staff.staff_id})</small>`;
+           suggestionItem.innerHTML = `${staff.staff_name} <small class="text-muted">(${staff.staff_id}) - ${staff.branch || 'N/A'}</small>`;
             suggestionItem.addEventListener('click', (e) => {
                 e.preventDefault();
                 selectStaff(staff);
