@@ -29,8 +29,8 @@ fs.createReadStream(staffFilePath)
   .pipe(csv())
   .on('data', (row) => {
     // Check if the essential headers exist in the row
-    if (!row['ID Number'] || !row['Last Name'] || !row['First Name']) {
-      console.warn("⚠️ Skipping a row because it's missing required data (ID Number, Last Name, or First Name). Check your CSV headers.");
+   if (!row['ID Number'] || !row['Last Name'] || !row['First Name'] || !row['Branch']) {
+      console.warn("⚠️ Skipping a row because it's missing required data. Check your CSV headers.");
       return;
     }
 
@@ -41,9 +41,10 @@ fs.createReadStream(staffFilePath)
     const middleInitial = middleName ? `${middleName.charAt(0)}.` : '';
     const fullName = `${lastName}, ${firstName} ${middleInitial}`.trim();
 
-    const newStaff = {
+   const newStaff = {
       staff_id: row['ID Number'],
-      staff_name: fullName
+      staff_name: fullName,
+      branch: row['Branch']
     };
 
     promises.push(db.collection('staff').add(newStaff));
