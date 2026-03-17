@@ -25,7 +25,8 @@ app.get('/api/staff', async (req, res) => {
 // --- UPDATED AND COMBINED: This single endpoint now handles checking and submitting ---
 app.post('/api/attend', async (req, res) => {
     try {
-        const { staff_id, staff_name } = req.body;
+        // EXTRACT THE NEW BRANCH VARIABLE
+        const { staff_id, staff_name, branch } = req.body;
 
         // Get the start and end of the current day based on the server's time
         const now = new Date();
@@ -50,6 +51,7 @@ app.post('/api/attend', async (req, res) => {
         const newRecord = {
             staff_id: staff_id,
             staff_name: staff_name,
+            branch: branch || 'N/A', // SAVE THE BRANCH TO THE DATABASE
             timestamp: new Date()
         };
         await db.collection('attendance').add(newRecord);
@@ -65,15 +67,30 @@ app.post('/api/attend', async (req, res) => {
 
 // We no longer need the separate /api/check-attendance endpoint. It has been removed.
 
-// API to export records (remains the same)
+// API to export records (UPDATED TO SORT BY BRANCH)
 app.get('/api/export', async (req, res) => {
     const snapshot = await db.collection('attendance').orderBy('timestamp', 'desc').get();
-    let csvContent = 'staff_id,staff_name,timestamp\n';
-    snapshot.forEach(doc => {
-        const record = doc.data();
-        const date = record.timestamp.toDate().toLocaleString('en-US', { timeZone: 'Asia/Manila' });
-        csvContent += `${record.staff_id},"${record.staff_name}","${date}"\n`;
+    
+    // Extract records into an array so we can sort them by branch
+    const records = [];
+    snapshot.forEach(doc => records.push(doc.data()));
+
+    // Sort alphabetically by branch
+    records.sort((a, b) => {
+        const branchA = a.branch || '';
+        const branchB = b.branch || '';
+        return branchA.localeCompare(branchB); 
     });
+
+    // Update CSV Header
+    let csvContent = 'branch,staff_id,staff_name,timestamp\n';
+    
+    // Build CSV Rows
+    records.forEach(record => {
+        const date = record.timestamp.toDate().toLocaleString('en-US', { timeZone: 'Asia/Manila' });
+        csvContent += `"${record.branch || 'N/A'}",${record.staff_id},"${record.staff_name}","${date}"\n`;
+    });
+
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename="attendance_records.csv"');
     res.status(200).send(csvContent);
